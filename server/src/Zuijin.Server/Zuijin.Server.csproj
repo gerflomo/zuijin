@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Zuijin.AspNetCore\Zuijin.AspNetCore.csproj" />
+    <ProjectReference Include="..\Zuijin.Infrastructure\Zuijin.Infrastructure.csproj" />
+    <ProjectReference Include="..\Zuijin.Application\Zuijin.Application.csproj" />
+    <ProjectReference Include="..\Zuijin.Domain\Zuijin.Domain.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

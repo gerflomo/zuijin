@@ -1,0 +1,28 @@
+# .NET
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+.vs/
+artifacts/
+TestResults/
+*.binlog
+
+# Secrets / local config
+appsettings.Local.json
+*.pfx
+*.key
+
+# Angular (admin portal)
+node_modules/
+dist/
+.angular/
+coverage/
+*.log
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/

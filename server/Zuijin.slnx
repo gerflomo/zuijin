@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Zuijin.Application/Zuijin.Application.csproj" />
+    <Project Path="src/Zuijin.AspNetCore/Zuijin.AspNetCore.csproj" />
+    <Project Path="src/Zuijin.Domain/Zuijin.Domain.csproj" />
+    <Project Path="src/Zuijin.Infrastructure/Zuijin.Infrastructure.csproj" />
+    <Project Path="src/Zuijin.Server/Zuijin.Server.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Zuijin.Application.Tests/Zuijin.Application.Tests.csproj" />
+    <Project Path="tests/Zuijin.Domain.Tests/Zuijin.Domain.Tests.csproj" />
+    <Project Path="tests/Zuijin.Infrastructure.Tests/Zuijin.Infrastructure.Tests.csproj" />
+    <Project Path="tests/Zuijin.Server.Tests/Zuijin.Server.Tests.csproj" />
+  </Folder>
+</Solution>
