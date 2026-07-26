@@ -8,6 +8,9 @@ public class Scope : BaseEntity<Guid>
     public bool IsStandard { get; set; }
     public bool IsActive { get; set; } = true;
 
+    /// <summary>Optimistic concurrency token (SQL Server rowversion).</summary>
+    public byte[] RowVersion { get; set; } = [];
+
     public ICollection<ScopeClaim> Claims { get; set; } = [];
     public ICollection<ClientScope> ClientScopes { get; set; } = [];
 }

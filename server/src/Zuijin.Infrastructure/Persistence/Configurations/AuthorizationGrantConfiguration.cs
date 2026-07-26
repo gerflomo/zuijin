@@ -12,8 +12,8 @@ public class AuthorizationGrantConfiguration : BaseEntityConfiguration<Authoriza
         builder.HasKey(g => g.Id);
         builder.Property(g => g.Id).UseIdentityColumn();
 
-        builder.Property(g => g.AuthorizationCode).HasMaxLength(500).IsRequired();
-        builder.HasIndex(g => g.AuthorizationCode);
+        builder.Property(g => g.CodeHash).HasMaxLength(500).IsRequired();
+        builder.HasIndex(g => g.CodeHash);
 
         builder.Property(g => g.RedirectUri).HasMaxLength(2000).IsRequired();
         builder.Property(g => g.Scopes).HasMaxLength(2000).IsRequired();

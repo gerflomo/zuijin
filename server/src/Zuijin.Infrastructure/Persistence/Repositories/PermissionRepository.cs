@@ -75,7 +75,8 @@ public class PermissionRepository : IPermissionRepository
 
     public Task Delete(Permission permission, CancellationToken cancellationToken = default)
     {
-        _context.Permissions.Remove(permission);
+        permission.IsDeleted = true;
+        _context.Permissions.Update(permission);
         return Task.CompletedTask;
     }
 }

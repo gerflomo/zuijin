@@ -4,8 +4,8 @@ namespace Zuijin.Domain.Entities;
 
 public class Token : BaseEntity<long>
 {
-    public string TokenHash { get; set; } = string.Empty;
-    public TokenType TokenType { get; set; }
+    public string Hash { get; set; } = string.Empty;
+    public TokenType Type { get; set; }
     public Guid ClientId { get; set; }
     public Guid? UserId { get; set; }
     public string Scopes { get; set; } = string.Empty;

@@ -13,11 +13,12 @@ public class ClientConfiguration : BaseEntityConfiguration<Client, Guid>
         builder.HasKey(c => c.Id);
 
         builder.Property(c => c.ClientId).HasMaxLength(200).IsRequired();
-        builder.HasIndex(c => c.ClientId).IsUnique();
+        // Filtered so a soft-deleted client does not reserve its client_id forever.
+        builder.HasIndex(c => c.ClientId).IsUnique().HasFilter("[IsDeleted] = 0");
 
         builder.Property(c => c.ClientName).HasMaxLength(200).IsRequired();
-        builder.Property(c => c.ClientSecretHash).HasMaxLength(500);
-        builder.Property(c => c.ClientType).IsRequired();
+        builder.Property(c => c.SecretHash).HasMaxLength(500);
+        builder.Property(c => c.Type).IsRequired();
         builder.Property(c => c.RequirePkce).HasDefaultValue(true);
         builder.Property(c => c.RequireConsent).HasDefaultValue(true);
         builder.Property(c => c.AllowOfflineAccess).HasDefaultValue(false);
@@ -25,6 +26,7 @@ public class ClientConfiguration : BaseEntityConfiguration<Client, Guid>
         builder.Property(c => c.RefreshTokenLifetime).HasDefaultValue(2592000);
         builder.Property(c => c.IdTokenLifetime).HasDefaultValue(3600);
         builder.Property(c => c.IsActive).HasDefaultValue(true);
+        builder.Property(c => c.RowVersion).IsRowVersion();
 
         builder.HasMany(c => c.RedirectUris).WithOne(r => r.Client).HasForeignKey(r => r.ClientId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(c => c.GrantTypes).WithOne(g => g.Client).HasForeignKey(g => g.ClientId).OnDelete(DeleteBehavior.Cascade);

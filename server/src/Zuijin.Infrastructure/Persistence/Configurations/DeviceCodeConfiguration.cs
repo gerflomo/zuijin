@@ -13,8 +13,8 @@ public class DeviceCodeConfiguration : BaseEntityConfiguration<DeviceCode, long>
         builder.HasKey(d => d.Id);
         builder.Property(d => d.Id).UseIdentityColumn();
 
-        builder.Property(d => d.DeviceCodeValue).HasMaxLength(500).IsRequired();
-        builder.HasIndex(d => d.DeviceCodeValue);
+        builder.Property(d => d.DeviceCodeHash).HasMaxLength(500).IsRequired();
+        builder.HasIndex(d => d.DeviceCodeHash);
 
         builder.Property(d => d.UserCode).HasMaxLength(20).IsRequired();
         builder.HasIndex(d => d.UserCode);

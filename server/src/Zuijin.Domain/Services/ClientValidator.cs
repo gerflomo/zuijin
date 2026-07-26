@@ -11,17 +11,25 @@ public static class ClientValidator
 {
     public static void ValidateRedirectUri(Client client, string redirectUri)
     {
-        var match = client.RedirectUris
+        var isRegistered = client.RedirectUris
             .FirstOrDefault(r => r.Type == RedirectUriType.Redirect &&
-                                  string.Equals(r.Uri, redirectUri, StringComparison.OrdinalIgnoreCase)) ?? 
-                                  throw new DomainException("invalid_redirect_uri", "The redirect URI is not registered for this client.");
+                                  string.Equals(r.Uri, redirectUri, StringComparison.OrdinalIgnoreCase)) != null;
+
+        if (!isRegistered)
+        {
+            throw new DomainException("invalid_redirect_uri", "The redirect URI is not registered for this client.");
+        }
     }
 
     public static void ValidateGrantType(Client client, string grantType)
     {
-        var match = client.GrantTypes
-            .FirstOrDefault(g => string.Equals(g.GrantType, grantType, StringComparison.OrdinalIgnoreCase)) ?? 
+        var isAuthorized = client.GrantTypes
+            .FirstOrDefault(g => string.Equals(g.GrantType, grantType, StringComparison.OrdinalIgnoreCase)) != null;
+
+        if (!isAuthorized)
+        {
             throw new DomainException("unauthorized_grant_type", $"The client is not authorized for grant type '{grantType}'.");
+        }
     }
 
     public static void ValidateScopes(Client client, IEnumerable<string> requestedScopes)
@@ -55,7 +63,7 @@ public static class ClientValidator
 
     public static void ValidateConfidentialClient(Client client, string? clientSecret)
     {
-        if (client.ClientType == ClientType.Confidential && string.IsNullOrEmpty(clientSecret))
+        if (client.Type == ClientType.Confidential && string.IsNullOrEmpty(clientSecret))
         {
             throw new DomainException("client_secret_required", "Client secret is required for confidential clients.");
         }

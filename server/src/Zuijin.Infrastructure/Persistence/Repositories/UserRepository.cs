@@ -74,7 +74,8 @@ public class UserRepository : IUserRepository
 
     public Task Delete(User user, CancellationToken cancellationToken = default)
     {
-        _context.Users.Remove(user);
+        user.IsDeleted = true;
+        _context.Users.Update(user);
         return Task.CompletedTask;
     }
 }

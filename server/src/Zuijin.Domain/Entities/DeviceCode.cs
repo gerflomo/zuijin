@@ -5,7 +5,12 @@ namespace Zuijin.Domain.Entities;
 
 public class DeviceCode : BaseEntity<long>
 {
-    public string DeviceCodeValue { get; set; } = string.Empty;
+    /// <summary>
+    /// SHA-256 hash of the device code. The plaintext code is returned to the device
+    /// once and never persisted. The user code stays plaintext: it is short-lived,
+    /// low-entropy, and must be looked up as typed by the user.
+    /// </summary>
+    public string DeviceCodeHash { get; set; } = string.Empty;
     public string UserCode { get; set; } = string.Empty;
     public Guid ClientId { get; set; }
     public string Scopes { get; set; } = string.Empty;

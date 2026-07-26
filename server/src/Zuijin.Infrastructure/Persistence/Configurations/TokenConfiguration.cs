@@ -12,10 +12,10 @@ public class TokenConfiguration : BaseEntityConfiguration<Token, long>
         builder.HasKey(t => t.Id);
         builder.Property(t => t.Id).UseIdentityColumn();
 
-        builder.Property(t => t.TokenHash).HasMaxLength(500).IsRequired();
-        builder.HasIndex(t => t.TokenHash);
+        builder.Property(t => t.Hash).HasMaxLength(500).IsRequired();
+        builder.HasIndex(t => t.Hash);
 
-        builder.Property(t => t.TokenType).IsRequired();
+        builder.Property(t => t.Type).IsRequired();
         builder.Property(t => t.Scopes).HasMaxLength(2000).IsRequired();
         builder.Property(t => t.IsRevoked).HasDefaultValue(false);
         builder.Property(t => t.ExpiresAt).IsRequired();

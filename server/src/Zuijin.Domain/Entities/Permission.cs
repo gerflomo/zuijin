@@ -8,5 +8,8 @@ public class Permission : BaseEntity<Guid>
     public string? GroupName { get; set; }
     public bool IsSystem { get; set; }
 
+    /// <summary>Optimistic concurrency token (SQL Server rowversion).</summary>
+    public byte[] RowVersion { get; set; } = [];
+
     public ICollection<RolePermission> RolePermissions { get; set; } = [];
 }

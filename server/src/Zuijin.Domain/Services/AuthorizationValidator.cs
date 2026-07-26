@@ -6,14 +6,14 @@ namespace Zuijin.Domain.Services;
 
 public static class AuthorizationValidator
 {
-    public static void ValidateAuthorizationCode(AuthorizationGrant grant)
+    public static void ValidateAuthorizationCode(AuthorizationGrant grant, DateTimeOffset now)
     {
         if (grant.IsUsed)
         {
             throw new DomainException("code_already_used", "The authorization code has already been used.");
         }
 
-        if (grant.ExpiresAt <= DateTimeOffset.UtcNow)
+        if (grant.ExpiresAt <= now)
         {
             throw new DomainException("code_expired", "The authorization code has expired.");
         }
@@ -62,8 +62,7 @@ public static class AuthorizationValidator
 
     private static bool ValidateS256Challenge(string codeChallenge, string codeVerifier)
     {
-        using var sha256 = System.Security.Cryptography.SHA256.Create();
-        var challengeBytes = sha256.ComputeHash(System.Text.Encoding.ASCII.GetBytes(codeVerifier));
+        var challengeBytes = System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.ASCII.GetBytes(codeVerifier));
         var computed = Base64UrlEncode(challengeBytes);
         return string.Equals(codeChallenge, computed, StringComparison.Ordinal);
     }

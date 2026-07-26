@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Zuijin.Domain.Entities;
+using Zuijin.Infrastructure.Persistence.Seeding;
 
 namespace Zuijin.Infrastructure.Persistence.Configurations;
 
@@ -15,5 +16,7 @@ public class ScopeClaimConfiguration : BaseEntityConfiguration<ScopeClaim, long>
         builder.Property(c => c.ClaimType).HasMaxLength(200).IsRequired();
 
         builder.HasIndex(c => new { c.ScopeId, c.ClaimType }).IsUnique();
+
+        builder.HasData(StandardScopeSeed.ScopeClaims);
     }
 }

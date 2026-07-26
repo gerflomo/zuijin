@@ -61,7 +61,10 @@ public class ClientRepository : IClientRepository
 
     public Task Delete(Client client, CancellationToken cancellationToken = default)
     {
-        _context.Clients.Remove(client);
+        // Aggregates are soft-deleted so audit history survives; the global
+        // query filter (!IsDeleted) hides them from every read.
+        client.IsDeleted = true;
+        _context.Clients.Update(client);
         return Task.CompletedTask;
     }
 }

@@ -19,7 +19,7 @@ public class DeviceCodeRepository : IDeviceCodeRepository
             .AsNoTracking()
             .Include(d => d.Client)
             .Include(d => d.User)
-            .FirstOrDefaultAsync(d => d.DeviceCodeValue == deviceCodeHash, cancellationToken);
+            .FirstOrDefaultAsync(d => d.DeviceCodeHash == deviceCodeHash, cancellationToken);
     }
 
     public async Task<DeviceCode?> GetByUserCode(string userCode, CancellationToken cancellationToken = default)

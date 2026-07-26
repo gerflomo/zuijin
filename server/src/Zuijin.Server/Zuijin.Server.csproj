@@ -1,4 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <UserSecretsId>7e212a78-dc32-45d9-89f5-bdd303b9e419</UserSecretsId>
+  </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Zuijin.AspNetCore\Zuijin.AspNetCore.csproj" />
@@ -6,11 +10,5 @@
     <ProjectReference Include="..\Zuijin.Application\Zuijin.Application.csproj" />
     <ProjectReference Include="..\Zuijin.Domain\Zuijin.Domain.csproj" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
 
 </Project>

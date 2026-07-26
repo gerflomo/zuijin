@@ -13,13 +13,13 @@ public class TokenRepository : ITokenRepository
         _context = context;
     }
 
-    public async Task<Token?> GetByTokenHash(string tokenHash, CancellationToken cancellationToken = default)
+    public async Task<Token?> GetByHash(string tokenHash, CancellationToken cancellationToken = default)
     {
         return await _context.Tokens
             .AsNoTracking()
             .Include(t => t.Client)
             .Include(t => t.User)
-            .FirstOrDefaultAsync(t => t.TokenHash == tokenHash, cancellationToken);
+            .FirstOrDefaultAsync(t => t.Hash == tokenHash, cancellationToken);
     }
 
     public async Task<IReadOnlyList<Token>> GetByUserId(Guid userId, CancellationToken cancellationToken = default)

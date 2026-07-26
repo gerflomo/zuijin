@@ -1,22 +1,25 @@
-using Zuijin.Domain.Constants;
-
 namespace Zuijin.Application.Configuration;
 
 /// <summary>
 /// Configuration options for the Zuijin identity server.
+/// All values are required: properties are nullable so that a missing configuration key
+/// can be detected and fail validation at startup instead of silently using a default.
 /// </summary>
 public class ZuijinOptions
 {
-    public string Issuer { get; set; } = string.Empty;
-    public bool RequirePkce { get; set; } = true;
-    public bool RequireHttpsRedirectUris { get; set; } = true;
-    public int DefaultAccessTokenLifetime { get; set; } = TokenDefaults.AccessTokenLifetimeSeconds;
-    public int DefaultRefreshTokenLifetime { get; set; } = TokenDefaults.RefreshTokenLifetimeSeconds;
-    public int DefaultIdTokenLifetime { get; set; } = TokenDefaults.IdTokenLifetimeSeconds;
-    public int AuthorizationCodeLifetime { get; set; } = TokenDefaults.AuthorizationCodeLifetimeSeconds;
-    public int DeviceCodeLifetime { get; set; } = TokenDefaults.DeviceCodeLifetimeSeconds;
-    public int DeviceCodePollingInterval { get; set; } = TokenDefaults.DeviceCodePollingIntervalSeconds;
-    public int KeyRotationIntervalDays { get; set; } = TokenDefaults.KeyRotationIntervalDays;
-    public int MaxFailedLoginAttempts { get; set; } = TokenDefaults.MaxFailedLoginAttempts;
-    public int LockoutDurationMinutes { get; set; } = TokenDefaults.LockoutDurationMinutes;
+    /// <summary>Configuration section name expected in the host configuration.</summary>
+    public const string SectionName = "Zuijin";
+
+    public string? Issuer { get; set; }
+    public bool? RequirePkce { get; set; }
+    public bool? RequireHttpsRedirectUris { get; set; }
+    public int? DefaultAccessTokenLifetime { get; set; }
+    public int? DefaultRefreshTokenLifetime { get; set; }
+    public int? DefaultIdTokenLifetime { get; set; }
+    public int? AuthorizationCodeLifetime { get; set; }
+    public int? DeviceCodeLifetime { get; set; }
+    public int? DeviceCodePollingInterval { get; set; }
+    public int? KeyRotationIntervalDays { get; set; }
+    public int? MaxFailedLoginAttempts { get; set; }
+    public int? LockoutDurationMinutes { get; set; }
 }

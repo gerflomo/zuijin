@@ -14,6 +14,9 @@ public class User : BaseEntity<Guid>
     public bool MfaEnabled { get; set; }
     public string? MfaSecret { get; set; }
 
+    /// <summary>Optimistic concurrency token (SQL Server rowversion).</summary>
+    public byte[] RowVersion { get; set; } = [];
+
     public ICollection<UserClaim> Claims { get; set; } = [];
     public ICollection<UserRole> UserRoles { get; set; } = [];
 }

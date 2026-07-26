@@ -12,10 +12,11 @@ public class UserConfiguration : BaseEntityConfiguration<User, Guid>
         builder.HasKey(u => u.Id);
 
         builder.Property(u => u.SubjectId).HasMaxLength(200).IsRequired();
-        builder.HasIndex(u => u.SubjectId).IsUnique();
+        // Filtered so a soft-deleted user does not reserve its identifiers forever.
+        builder.HasIndex(u => u.SubjectId).IsUnique().HasFilter("[IsDeleted] = 0");
 
         builder.Property(u => u.Username).HasMaxLength(200).IsRequired();
-        builder.HasIndex(u => u.Username).IsUnique();
+        builder.HasIndex(u => u.Username).IsUnique().HasFilter("[IsDeleted] = 0");
 
         builder.Property(u => u.Email).HasMaxLength(200).IsRequired();
         builder.HasIndex(u => u.Email);
@@ -27,6 +28,7 @@ public class UserConfiguration : BaseEntityConfiguration<User, Guid>
         builder.Property(u => u.FailedLoginCount).HasDefaultValue(0);
         builder.Property(u => u.MfaEnabled).HasDefaultValue(false);
         builder.Property(u => u.MfaSecret).HasMaxLength(500);
+        builder.Property(u => u.RowVersion).IsRowVersion();
 
         builder.HasMany(u => u.Claims).WithOne(c => c.User).HasForeignKey(c => c.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(u => u.UserRoles).WithOne(ur => ur.User).HasForeignKey(ur => ur.UserId).OnDelete(DeleteBehavior.Cascade);

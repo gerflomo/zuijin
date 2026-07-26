@@ -67,7 +67,8 @@ public class ScopeRepository : IScopeRepository
 
     public Task Delete(Scope scope, CancellationToken cancellationToken = default)
     {
-        _context.Scopes.Remove(scope);
+        scope.IsDeleted = true;
+        _context.Scopes.Update(scope);
         return Task.CompletedTask;
     }
 }

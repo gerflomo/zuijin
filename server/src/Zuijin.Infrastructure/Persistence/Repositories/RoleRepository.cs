@@ -67,7 +67,8 @@ public class RoleRepository : IRoleRepository
 
     public Task Delete(Role role, CancellationToken cancellationToken = default)
     {
-        _context.Roles.Remove(role);
+        role.IsDeleted = true;
+        _context.Roles.Update(role);
         return Task.CompletedTask;
     }
 }

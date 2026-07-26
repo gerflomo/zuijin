@@ -7,7 +7,7 @@ namespace Zuijin.Domain.Repositories;
 /// </summary>
 public interface ITokenRepository
 {
-    Task<Token?> GetByTokenHash(string tokenHash, CancellationToken cancellationToken = default);
+    Task<Token?> GetByHash(string tokenHash, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Token>> GetByUserId(Guid userId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Token>> GetByClientId(Guid clientId, CancellationToken cancellationToken = default);
     Task Add(Token token, CancellationToken cancellationToken = default);

@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Zuijin.Application.Configuration;
 using Zuijin.Infrastructure.DependencyInjection;
 
 namespace Zuijin.AspNetCore.DependencyInjection;
@@ -8,12 +7,10 @@ namespace Zuijin.AspNetCore.DependencyInjection;
 public class ZuijinBuilder
 {
     public IServiceCollection Services { get; }
-    public ZuijinOptions Options { get; }
 
-    internal ZuijinBuilder(IServiceCollection services, ZuijinOptions options)
+    internal ZuijinBuilder(IServiceCollection services)
     {
         Services = services;
-        Options = options;
     }
 
     public ZuijinBuilder UseEntityFramework(Action<DbContextOptionsBuilder> configureDbContext)

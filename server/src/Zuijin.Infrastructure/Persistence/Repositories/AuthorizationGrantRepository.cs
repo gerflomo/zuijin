@@ -19,7 +19,7 @@ public class AuthorizationGrantRepository : IAuthorizationGrantRepository
             .AsNoTracking()
             .Include(g => g.Client)
             .Include(g => g.User)
-            .FirstOrDefaultAsync(g => g.AuthorizationCode == codeHash, cancellationToken);
+            .FirstOrDefaultAsync(g => g.CodeHash == codeHash, cancellationToken);
     }
 
     public async Task Add(AuthorizationGrant grant, CancellationToken cancellationToken = default)

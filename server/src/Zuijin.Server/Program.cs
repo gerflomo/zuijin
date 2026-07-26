@@ -1,16 +1,15 @@
+using Zuijin.Application.Configuration;
 using Zuijin.AspNetCore.DependencyInjection;
 using Zuijin.AspNetCore.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("Zuijin")
-    ?? throw new InvalidOperationException("Connection string 'Zuijin' not found.");
+    ?? throw new InvalidOperationException(
+        "Connection string 'Zuijin' not found. Configure it via user secrets (local) or a secret store (cloud).");
 
 builder.Services
-    .AddZuijin(options =>
-    {
-        options.Issuer = builder.Configuration["Zuijin:Issuer"] ?? "https://localhost:5001";
-    })
+    .AddZuijin(options => builder.Configuration.GetSection(ZuijinOptions.SectionName).Bind(options))
     .UseSqlServer(connectionString);
 
 var app = builder.Build();
