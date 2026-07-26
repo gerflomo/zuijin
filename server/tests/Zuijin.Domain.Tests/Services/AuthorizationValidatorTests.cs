@@ -116,31 +116,20 @@ public class AuthorizationValidatorTests
     }
 
     [Fact]
-    public void ValidateCodeChallenge_PlainMatchingVerifier_DoesNotThrow()
+    public void ValidateCodeChallenge_PlainMethod_IsRejected()
     {
-        // Arrange
-        var grant = CreateGrant();
-        grant.CodeChallenge = "plain-verifier-value";
-        grant.CodeChallengeMethod = "plain";
-
-        // Act & Assert
-        Should.NotThrow(() => AuthorizationValidator.ValidateCodeChallenge(grant, "plain-verifier-value"));
-    }
-
-    [Fact]
-    public void ValidateCodeChallenge_PlainWrongVerifier_ThrowsInvalidCodeVerifier()
-    {
-        // Arrange
+        // Arrange: "plain" sends the verifier unhashed, so it must never be accepted
+        // even when the challenge and the verifier match.
         var grant = CreateGrant();
         grant.CodeChallenge = "plain-verifier-value";
         grant.CodeChallengeMethod = "plain";
 
         // Act
         var exception = Should.Throw<DomainException>(
-            () => AuthorizationValidator.ValidateCodeChallenge(grant, "another-value"));
+            () => AuthorizationValidator.ValidateCodeChallenge(grant, "plain-verifier-value"));
 
         // Assert
-        exception.Code.ShouldBe("invalid_code_verifier");
+        exception.Code.ShouldBe("invalid_challenge_method");
     }
 
     [Fact]
@@ -172,13 +161,17 @@ public class AuthorizationValidatorTests
         exception.Code.ShouldBe("pkce_required");
     }
 
-    [Fact]
-    public void ValidateCodeChallenge_UnsupportedMethod_ThrowsInvalidChallengeMethod()
+    [Theory]
+    [InlineData("S512")]
+    [InlineData("s256")]
+    [InlineData("")]
+    [InlineData(null)]
+    public void ValidateCodeChallenge_UnsupportedMethod_ThrowsInvalidChallengeMethod(string? method)
     {
         // Arrange
         var grant = CreateGrant();
         grant.CodeChallenge = "challenge";
-        grant.CodeChallengeMethod = "S512";
+        grant.CodeChallengeMethod = method;
 
         // Act
         var exception = Should.Throw<DomainException>(

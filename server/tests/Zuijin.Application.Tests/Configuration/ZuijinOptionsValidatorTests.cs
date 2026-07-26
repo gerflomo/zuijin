@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Shouldly;
 using Zuijin.Application.Configuration;
 
@@ -5,11 +6,14 @@ namespace Zuijin.Application.Tests.Configuration;
 
 public class ZuijinOptionsValidatorTests
 {
+    private static readonly string ValidMasterKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+
     private static ZuijinOptions CreateValidOptions()
     {
         return new ZuijinOptions
         {
             Issuer = "https://auth.example.com",
+            SigningKeyMasterKey = ValidMasterKey,
             RequirePkce = true,
             RequireHttpsRedirectUris = true,
             DefaultAccessTokenLifetime = 3600,
@@ -47,7 +51,55 @@ public class ZuijinOptionsValidatorTests
         var errors = ZuijinOptionsValidator.Validate(options);
 
         // Assert
-        errors.Count.ShouldBe(12);
+        errors.Count.ShouldBe(13);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Validate_MissingMasterKey_ReturnsError(string? masterKey)
+    {
+        // Arrange
+        var options = CreateValidOptions();
+        options.SigningKeyMasterKey = masterKey;
+
+        // Act
+        var errors = ZuijinOptionsValidator.Validate(options);
+
+        // Assert
+        errors.ShouldContain(e => e.Contains("Zuijin:SigningKeyMasterKey") && e.Contains("not configured"));
+    }
+
+    [Fact]
+    public void Validate_MasterKeyNotBase64_ReturnsFormatError()
+    {
+        // Arrange
+        var options = CreateValidOptions();
+        options.SigningKeyMasterKey = "this is not base64 !!";
+
+        // Act
+        var errors = ZuijinOptionsValidator.Validate(options);
+
+        // Assert
+        errors.ShouldContain(e => e.Contains("valid base64"));
+    }
+
+    [Theory]
+    [InlineData(16)]
+    [InlineData(31)]
+    [InlineData(64)]
+    public void Validate_MasterKeyWithWrongLength_ReturnsSizeError(int keySizeBytes)
+    {
+        // Arrange
+        var options = CreateValidOptions();
+        options.SigningKeyMasterKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(keySizeBytes));
+
+        // Act
+        var errors = ZuijinOptionsValidator.Validate(options);
+
+        // Assert
+        errors.ShouldContain(e => e.Contains("exactly 32 bytes"));
     }
 
     [Theory]

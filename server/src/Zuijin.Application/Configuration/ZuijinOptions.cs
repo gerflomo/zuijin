@@ -11,6 +11,14 @@ public class ZuijinOptions
     public const string SectionName = "Zuijin";
 
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Base64-encoded 256-bit master key used to encrypt RSA private keys at rest.
+    /// Must come from a secret store (user secrets locally, a key vault in the cloud),
+    /// never from appsettings.json.
+    /// </summary>
+    public string? SigningKeyMasterKey { get; set; }
+
     public bool? RequirePkce { get; set; }
     public bool? RequireHttpsRedirectUris { get; set; }
     public int? DefaultAccessTokenLifetime { get; set; }

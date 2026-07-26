@@ -34,6 +34,11 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IClock, SystemClock>();
         services.AddSingleton<IPasswordHasher, Argon2PasswordHasher>();
         services.AddSingleton<IEventPublisher, NoOpEventPublisher>();
+        services.AddSingleton<IKeyProtector, AesKeyProtector>();
+        services.AddSingleton<ISigningKeyService, SigningKeyService>();
+        services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
+
+        services.AddHostedService<SigningKeyMaintenanceService>();
 
         return services;
     }

@@ -14,6 +14,7 @@ public static class ZuijinOptionsValidator
         var errors = new List<string>();
 
         ValidateIssuer(options.Issuer, errors);
+        ValidateMasterKey(options.SigningKeyMasterKey, errors);
 
         RequireValue(options.RequirePkce, nameof(ZuijinOptions.RequirePkce), errors);
         RequireValue(options.RequireHttpsRedirectUris, nameof(ZuijinOptions.RequireHttpsRedirectUris), errors);
@@ -50,6 +51,31 @@ public static class ZuijinOptionsValidator
         if (!isHttps && !uri.IsLoopback)
         {
             errors.Add($"'{ZuijinOptions.SectionName}:{nameof(ZuijinOptions.Issuer)}' must use HTTPS for non-loopback hosts.");
+        }
+    }
+
+    private static void ValidateMasterKey(string? masterKey, List<string> errors)
+    {
+        const int requiredKeySizeBytes = 32;
+
+        if (string.IsNullOrWhiteSpace(masterKey))
+        {
+            errors.Add(MissingKey(nameof(ZuijinOptions.SigningKeyMasterKey)));
+            return;
+        }
+
+        // Buffer sized to the maximum a base64 string of this length can decode to,
+        // so an oversized key is reported as a size error rather than a format error.
+        var decoded = new byte[masterKey.Length / 4 * 3 + 3];
+        if (!Convert.TryFromBase64String(masterKey, decoded, out var bytesWritten))
+        {
+            errors.Add($"'{ZuijinOptions.SectionName}:{nameof(ZuijinOptions.SigningKeyMasterKey)}' must be a valid base64 string.");
+            return;
+        }
+
+        if (bytesWritten != requiredKeySizeBytes)
+        {
+            errors.Add($"'{ZuijinOptions.SectionName}:{nameof(ZuijinOptions.SigningKeyMasterKey)}' must decode to exactly {requiredKeySizeBytes} bytes (256 bits).");
         }
     }
 

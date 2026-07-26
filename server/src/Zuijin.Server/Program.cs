@@ -17,3 +17,8 @@ var app = builder.Build();
 app.MapZuijinEndpoints();
 
 app.Run();
+
+/// <summary>
+/// Exposed so integration tests can boot the real host through WebApplicationFactory.
+/// </summary>
+public partial class Program;

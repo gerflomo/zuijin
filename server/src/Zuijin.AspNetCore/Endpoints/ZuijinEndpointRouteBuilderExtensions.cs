@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
+using Zuijin.AspNetCore.Endpoints.Discovery;
 
 namespace Zuijin.AspNetCore.Endpoints;
 
@@ -7,9 +8,9 @@ public static class ZuijinEndpointRouteBuilderExtensions
 {
     public static IEndpointRouteBuilder MapZuijinEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        // OAuth/OIDC endpoints will be mapped here in subsequent phases:
-        // - /.well-known/openid-configuration (Phase 2)
-        // - /.well-known/jwks (Phase 2)
+        endpoints.MapDiscoveryEndpoints();
+
+        // Remaining OAuth/OIDC endpoints arrive in subsequent phases:
         // - /connect/token (Phase 3)
         // - /connect/authorize (Phase 4)
         // - /connect/userinfo (Phase 5)

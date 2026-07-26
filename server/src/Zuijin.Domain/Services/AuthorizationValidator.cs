@@ -33,8 +33,7 @@ public static class AuthorizationValidator
 
         var isValid = grant.CodeChallengeMethod switch
         {
-            "S256" => ValidateS256Challenge(grant.CodeChallenge, codeVerifier),
-            "plain" => string.Equals(grant.CodeChallenge, codeVerifier, StringComparison.Ordinal),
+            CodeChallengeMethods.S256 => ValidateS256Challenge(grant.CodeChallenge, codeVerifier),
             _ => throw new DomainException("invalid_challenge_method", $"Unsupported code challenge method: {grant.CodeChallengeMethod}")
         };
 
