@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Zuijin.Application.Configuration;
+using Zuijin.Application.Features.Tokens;
 
 namespace Zuijin.AspNetCore.DependencyInjection;
 
@@ -19,6 +20,9 @@ public static class ZuijinServiceCollectionExtensions
         // Concrete singleton so consumers can depend on ZuijinOptions directly;
         // resolving it triggers the same validation as IOptions<ZuijinOptions>.
         services.AddSingleton(sp => sp.GetRequiredService<IOptions<ZuijinOptions>>().Value);
+
+        // Application feature handlers.
+        services.AddScoped<ClientCredentialsTokenHandler>();
 
         return new ZuijinBuilder(services);
     }

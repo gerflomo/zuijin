@@ -25,6 +25,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
         services.AddScoped<IScopeRepository, ScopeRepository>();
+        services.AddScoped<IApiResourceRepository, ApiResourceRepository>();
         services.AddScoped<IAuthorizationGrantRepository, AuthorizationGrantRepository>();
         services.AddScoped<IDeviceCodeRepository, DeviceCodeRepository>();
         services.AddScoped<IConsentRepository, ConsentRepository>();
@@ -33,6 +34,7 @@ public static class InfrastructureServiceCollectionExtensions
         // Services
         services.AddSingleton<IClock, SystemClock>();
         services.AddSingleton<IPasswordHasher, Argon2PasswordHasher>();
+        services.AddSingleton<ISecretHasher, Sha256SecretHasher>();
         services.AddSingleton<IEventPublisher, NoOpEventPublisher>();
         services.AddSingleton<IKeyProtector, AesKeyProtector>();
         services.AddSingleton<ISigningKeyService, SigningKeyService>();

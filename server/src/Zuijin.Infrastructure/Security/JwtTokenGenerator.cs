@@ -85,13 +85,17 @@ public class JwtTokenGenerator : ITokenGenerator
         var descriptor = new SecurityTokenDescriptor
         {
             Issuer = request.Issuer,
-            Audience = request.Audience,
             IssuedAt = issuedAt,
             NotBefore = issuedAt,
             Expires = issuedAt.Add(request.Lifetime),
             Claims = claims,
             SigningCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256)
         };
+
+        foreach (var audience in request.Audiences)
+        {
+            descriptor.Audiences.Add(audience);
+        }
 
         return new JsonWebTokenHandler().CreateToken(descriptor);
     }

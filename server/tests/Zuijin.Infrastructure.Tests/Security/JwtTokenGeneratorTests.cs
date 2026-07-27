@@ -58,7 +58,7 @@ public class JwtTokenGeneratorTests : IDisposable
         {
             Issuer = "https://auth.example.com",
             Subject = "user-subject-id",
-            Audience = "api.example.com",
+            Audiences = ["api.example.com"],
             Scopes = ["openid", "profile"],
             Lifetime = TimeSpan.FromHours(1)
         };
@@ -88,7 +88,7 @@ public class JwtTokenGeneratorTests : IDisposable
     public async Task GenerateAccessToken_ValidRequest_ProducesTokenSignedWithActiveKey()
     {
         // Act
-        var token = await _generator.GenerateAccessToken(CreateRequest());
+        var token = await _generator.GenerateAccessToken(CreateRequest(), TestContext.Current.CancellationToken);
 
         // Assert
         var parsed = await ValidateAndRead(token);
@@ -100,7 +100,7 @@ public class JwtTokenGeneratorTests : IDisposable
     public async Task GenerateAccessToken_ValidRequest_SetsRegisteredClaims()
     {
         // Act
-        var token = await _generator.GenerateAccessToken(CreateRequest());
+        var token = await _generator.GenerateAccessToken(CreateRequest(), TestContext.Current.CancellationToken);
 
         // Assert
         var parsed = await ValidateAndRead(token);
@@ -114,7 +114,7 @@ public class JwtTokenGeneratorTests : IDisposable
     public async Task GenerateAccessToken_MultipleScopes_JoinsThemWithSpaces()
     {
         // Act
-        var token = await _generator.GenerateAccessToken(CreateRequest());
+        var token = await _generator.GenerateAccessToken(CreateRequest(), TestContext.Current.CancellationToken);
 
         // Assert
         var parsed = await ValidateAndRead(token);
@@ -129,7 +129,7 @@ public class JwtTokenGeneratorTests : IDisposable
         request.Claims["role"] = "admin";
 
         // Act
-        var token = await _generator.GenerateAccessToken(request);
+        var token = await _generator.GenerateAccessToken(request, TestContext.Current.CancellationToken);
 
         // Assert
         var parsed = await ValidateAndRead(token);
@@ -144,7 +144,7 @@ public class JwtTokenGeneratorTests : IDisposable
         request.Lifetime = TimeSpan.FromMinutes(30);
 
         // Act
-        var token = await _generator.GenerateAccessToken(request);
+        var token = await _generator.GenerateAccessToken(request, TestContext.Current.CancellationToken);
 
         // Assert
         var parsed = await ValidateAndRead(token);
@@ -156,8 +156,8 @@ public class JwtTokenGeneratorTests : IDisposable
     public async Task GenerateAccessToken_TwoCalls_ProduceDifferentTokenIds()
     {
         // Act
-        var first = await ValidateAndRead(await _generator.GenerateAccessToken(CreateRequest()));
-        var second = await ValidateAndRead(await _generator.GenerateAccessToken(CreateRequest()));
+        var first = await ValidateAndRead(await _generator.GenerateAccessToken(CreateRequest(), TestContext.Current.CancellationToken));
+        var second = await ValidateAndRead(await _generator.GenerateAccessToken(CreateRequest(), TestContext.Current.CancellationToken));
 
         // Assert
         first.GetClaim(JwtRegisteredClaimNames.Jti).Value
@@ -172,11 +172,41 @@ public class JwtTokenGeneratorTests : IDisposable
         request.Nonce = "n-0S6_WzA2Mj";
 
         // Act
-        var token = await _generator.GenerateIdToken(request);
+        var token = await _generator.GenerateIdToken(request, TestContext.Current.CancellationToken);
 
         // Assert
         var parsed = await ValidateAndRead(token);
         parsed.GetClaim(JwtRegisteredClaimNames.Nonce).Value.ShouldBe("n-0S6_WzA2Mj");
+    }
+
+    [Fact]
+    public async Task GenerateAccessToken_MultipleAudiences_EmitsThemAll()
+    {
+        // Arrange
+        var request = CreateRequest();
+        request.Audiences = ["api.example.com", "reports.example.com"];
+
+        // Act
+        var token = await _generator.GenerateAccessToken(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        var parsed = await ValidateAndRead(token);
+        parsed.Audiences.ShouldBe(["api.example.com", "reports.example.com"], ignoreOrder: true);
+    }
+
+    [Fact]
+    public async Task GenerateAccessToken_NoAudience_OmitsTheAudienceClaim()
+    {
+        // Arrange: a token that targets no API must not claim one.
+        var request = CreateRequest();
+        request.Audiences = [];
+
+        // Act
+        var token = await _generator.GenerateAccessToken(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        var parsed = new JsonWebTokenHandler().ReadJsonWebToken(token);
+        parsed.Audiences.ShouldBeEmpty();
     }
 
     [Fact]
@@ -187,7 +217,7 @@ public class JwtTokenGeneratorTests : IDisposable
         request.Scopes = [];
 
         // Act
-        var token = await _generator.GenerateIdToken(request);
+        var token = await _generator.GenerateIdToken(request, TestContext.Current.CancellationToken);
 
         // Assert
         var parsed = await ValidateAndRead(token);

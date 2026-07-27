@@ -15,6 +15,8 @@ public class ZuijinDbContext : DbContext, IUnitOfWork
     public DbSet<ClientScope> ClientScopes => Set<ClientScope>();
     public DbSet<Scope> Scopes => Set<Scope>();
     public DbSet<ScopeClaim> ScopeClaims => Set<ScopeClaim>();
+    public DbSet<ApiResource> ApiResources => Set<ApiResource>();
+    public DbSet<ApiResourceScope> ApiResourceScopes => Set<ApiResourceScope>();
     public DbSet<User> Users => Set<User>();
     public DbSet<UserClaim> UserClaims => Set<UserClaim>();
     public DbSet<Role> Roles => Set<Role>();

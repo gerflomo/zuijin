@@ -9,7 +9,8 @@ using Zuijin.AspNetCore.Endpoints;
 
 namespace Zuijin.Server.Tests.Endpoints;
 
-public class DiscoveryEndpointsTests : IClassFixture<ZuijinApplicationFactory>
+[Collection(ZuijinTestCollection.Name)]
+public class DiscoveryEndpointsTests
 {
     private readonly ZuijinApplicationFactory _factory;
     private readonly HttpClient _client;
@@ -22,10 +23,10 @@ public class DiscoveryEndpointsTests : IClassFixture<ZuijinApplicationFactory>
 
     private async Task<JsonElement> GetJson(string path)
     {
-        var response = await _client.GetAsync(path);
+        var response = await _client.GetAsync(path, TestContext.Current.CancellationToken);
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        return JsonSerializer.Deserialize<JsonElement>(await response.Content.ReadAsStringAsync());
+        return JsonSerializer.Deserialize<JsonElement>(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
     }
 
     private static IReadOnlyList<string> ReadStringArray(JsonElement element, string propertyName)
@@ -139,13 +140,13 @@ public class DiscoveryEndpointsTests : IClassFixture<ZuijinApplicationFactory>
         {
             Issuer = ZuijinApplicationFactory.Issuer,
             Subject = "integration-test-subject",
-            Audience = audience,
+            Audiences = [audience],
             Scopes = ["openid"],
             Lifetime = TimeSpan.FromMinutes(5)
-        });
+        }, TestContext.Current.CancellationToken);
 
         // Act
-        var keySet = new JsonWebKeySet(await _client.GetStringAsync(ZuijinEndpointPaths.Jwks));
+        var keySet = new JsonWebKeySet(await _client.GetStringAsync(ZuijinEndpointPaths.Jwks, TestContext.Current.CancellationToken));
 
         var result = await new JsonWebTokenHandler().ValidateTokenAsync(token, new TokenValidationParameters
         {
