@@ -40,9 +40,8 @@ public class ClientCredentialsTokenHandlerTests
             .Returns([ApiAudience]);
 
         _handler = new ClientCredentialsTokenHandler(
-            _clientRepository,
+            new ClientAuthenticator(_clientRepository, _secretHasher),
             _apiResourceRepository,
-            _secretHasher,
             _tokenGenerator,
             new ZuijinOptions { Issuer = "https://auth.example.com" });
     }

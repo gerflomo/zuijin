@@ -22,6 +22,17 @@ public class AuthorizationGrantRepository : IAuthorizationGrantRepository
             .FirstOrDefaultAsync(g => g.CodeHash == codeHash, cancellationToken);
     }
 
+    public async Task<bool> TryConsume(long grantId, CancellationToken cancellationToken = default)
+    {
+        // The IsUsed predicate lives in the UPDATE itself, so the database decides the winner
+        // when two redemptions of the same code arrive at once.
+        var affectedRows = await _context.AuthorizationGrants
+            .Where(grant => grant.Id == grantId && !grant.IsUsed)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(grant => grant.IsUsed, true), cancellationToken);
+
+        return affectedRows == 1;
+    }
+
     public async Task Add(AuthorizationGrant grant, CancellationToken cancellationToken = default)
     {
         await _context.AuthorizationGrants.AddAsync(grant, cancellationToken);

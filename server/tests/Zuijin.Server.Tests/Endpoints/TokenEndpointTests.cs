@@ -308,9 +308,9 @@ public class TokenEndpointTests
     }
 
     [Theory]
-    [InlineData("authorization_code")]
-    [InlineData("refresh_token")]
     [InlineData("password")]
+    [InlineData("urn:ietf:params:oauth:grant-type:device_code")]
+    [InlineData("something_made_up")]
     public async Task Post_GrantTypeNotImplemented_ReturnsUnsupportedGrantType(string grantType)
     {
         // Act

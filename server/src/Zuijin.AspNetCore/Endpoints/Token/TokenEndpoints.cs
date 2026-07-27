@@ -8,8 +8,7 @@ using Zuijin.Domain.Errors;
 namespace Zuijin.AspNetCore.Endpoints.Token;
 
 /// <summary>
-/// The OAuth 2.0 token endpoint. Grant types are dispatched from the request body;
-/// only the client credentials grant is implemented so far.
+/// The OAuth 2.0 token endpoint. Grant types are dispatched from the request body.
 /// </summary>
 public static class TokenEndpoints
 {
@@ -28,6 +27,8 @@ public static class TokenEndpoints
     private static async Task<IResult> IssueToken(
         HttpContext httpContext,
         ClientCredentialsTokenHandler clientCredentialsHandler,
+        AuthorizationCodeTokenHandler authorizationCodeHandler,
+        RefreshTokenGrantHandler refreshTokenHandler,
         CancellationToken cancellationToken)
     {
         if (!httpContext.Request.HasFormContentType)
@@ -44,20 +45,37 @@ public static class TokenEndpoints
             throw new OAuthException(OAuthError.InvalidRequest("The grant_type parameter is required."));
         }
 
-        if (!string.Equals(grantType, GrantTypes.ClientCredentials, StringComparison.Ordinal))
-        {
-            throw new OAuthException(OAuthError.UnsupportedGrantType(
-                $"The grant type '{grantType}' is not supported."));
-        }
-
         var (clientId, clientSecret) = ClientCredentialsReader.Read(httpContext.Request, form);
 
-        var result = await clientCredentialsHandler.Handle(new ClientCredentialsTokenRequest
+        var result = grantType switch
         {
-            ClientId = clientId,
-            ClientSecret = clientSecret,
-            RequestedScopes = ParseScopes(form[ScopeParameter].ToString())
-        }, cancellationToken);
+            GrantTypes.ClientCredentials => await clientCredentialsHandler.Handle(new ClientCredentialsTokenRequest
+            {
+                ClientId = clientId,
+                ClientSecret = clientSecret,
+                RequestedScopes = ParseScopes(form[ScopeParameter].ToString())
+            }, cancellationToken),
+
+            GrantTypes.AuthorizationCode => await authorizationCodeHandler.Handle(new AuthorizationCodeTokenRequest
+            {
+                ClientId = clientId,
+                ClientSecret = clientSecret,
+                Code = form["code"].ToString(),
+                RedirectUri = form["redirect_uri"].ToString(),
+                CodeVerifier = form["code_verifier"].ToString()
+            }, cancellationToken),
+
+            GrantTypes.RefreshToken => await refreshTokenHandler.Handle(new RefreshTokenGrantRequest
+            {
+                ClientId = clientId,
+                ClientSecret = clientSecret,
+                RefreshToken = form["refresh_token"].ToString(),
+                RequestedScopes = ParseScopes(form[ScopeParameter].ToString())
+            }, cancellationToken),
+
+            _ => throw new OAuthException(OAuthError.UnsupportedGrantType(
+                $"The grant type '{grantType}' is not supported."))
+        };
 
         // RFC 6749 section 5.1: token responses must never be cached.
         httpContext.Response.Headers.CacheControl = "no-store";
@@ -68,7 +86,9 @@ public static class TokenEndpoints
             AccessToken = result.AccessToken,
             TokenType = result.TokenType,
             ExpiresIn = result.ExpiresIn,
-            Scope = result.Scope
+            Scope = result.Scope,
+            IdToken = result.IdToken,
+            RefreshToken = result.RefreshToken
         });
     }
 

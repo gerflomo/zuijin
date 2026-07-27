@@ -43,6 +43,46 @@ public sealed class ZuijinApplicationFactory : WebApplicationFactory<Program>, I
         await using var context = new ZuijinDbContext(options, new SystemClock());
         await context.Database.MigrateAsync();
         await SeedTestClients(context);
+        await SeedTestUser(context);
+    }
+
+    /// <summary>
+    /// A user with one role and one permission, so token issuance exercises RBAC resolution.
+    /// </summary>
+    private static async Task SeedTestUser(ZuijinDbContext context)
+    {
+        await context.Users.IgnoreQueryFilters().Where(user => user.Id == UserId).ExecuteDeleteAsync();
+        await context.Roles.IgnoreQueryFilters().Where(role => role.Id == RoleId).ExecuteDeleteAsync();
+        await context.Permissions.IgnoreQueryFilters()
+            .Where(permission => permission.Id == PermissionId).ExecuteDeleteAsync();
+
+        context.Permissions.Add(new Permission
+        {
+            Id = PermissionId,
+            Name = PermissionName,
+            DisplayName = "Read reports"
+        });
+
+        context.Roles.Add(new Role
+        {
+            Id = RoleId,
+            Name = RoleName,
+            RolePermissions = [new RolePermission { PermissionId = PermissionId }]
+        });
+
+        context.Users.Add(new User
+        {
+            Id = UserId,
+            SubjectId = SubjectId,
+            Username = Username,
+            Email = "test-user@example.test",
+            EmailConfirmed = true,
+            PasswordHash = new Argon2PasswordHasher().HashPassword(Password),
+            IsActive = true,
+            UserRoles = [new UserRole { RoleId = RoleId }]
+        });
+
+        await context.SaveChangesAsync();
     }
 
     /// <summary>Name of the fixture API resource, i.e. the audience the tests expect.</summary>
@@ -54,13 +94,31 @@ public sealed class ZuijinApplicationFactory : WebApplicationFactory<Program>, I
     private static readonly Guid ApiResourceId = new("019fa100-0000-7000-8000-000000000001");
     private static readonly Guid ApiScopeId = new("019fa100-0000-7000-8000-000000000002");
 
+    /// <summary>Client configured for the authorization code flow.</summary>
+    public const string CodeClientId = "test-code-client";
+
+    public const string CodeClientRedirectUri = "https://client.example.test/callback";
+    public const string ConsentClientId = "test-consent-client";
+    public const string Username = "test-user";
+    public const string Password = "test-user-password";
+    public const string SubjectId = "test-subject-id";
+    public const string RoleName = "tester";
+    public const string PermissionName = "reports.read";
+
+    private static readonly Guid UserId = new("019fa100-0000-7000-8000-000000000003");
+    private static readonly Guid RoleId = new("019fa100-0000-7000-8000-000000000004");
+    private static readonly Guid PermissionId = new("019fa100-0000-7000-8000-000000000005");
+
     /// <summary>
     /// Recreates the fixture data so each run starts from a known state.
     /// </summary>
     private static async Task SeedTestClients(ZuijinDbContext context)
     {
         string[] fixtureClientIds =
-            [ConfidentialClientId, PublicClientId, DisabledClientId, WrongGrantClientId];
+        [
+            ConfidentialClientId, PublicClientId, DisabledClientId, WrongGrantClientId,
+            CodeClientId, ConsentClientId
+        ];
 
         // Clients first: they reference the scope that is deleted below.
         await context.Clients
@@ -106,9 +164,40 @@ public sealed class ZuijinApplicationFactory : WebApplicationFactory<Program>, I
             CreateClient(DisabledClientId, secretHash, ClientType.Confidential, isActive: false,
                 GrantTypes.ClientCredentials),
             CreateClient(WrongGrantClientId, secretHash, ClientType.Confidential, isActive: true,
-                GrantTypes.AuthorizationCode));
+                GrantTypes.AuthorizationCode),
+            CreateCodeFlowClient(CodeClientId, secretHash, requireConsent: false),
+            CreateCodeFlowClient(ConsentClientId, secretHash, requireConsent: true));
 
         await context.SaveChangesAsync();
+    }
+
+    private static Client CreateCodeFlowClient(string clientId, string secretHash, bool requireConsent)
+    {
+        return new Client
+        {
+            Id = Guid.CreateVersion7(),
+            ClientId = clientId,
+            ClientName = clientId,
+            SecretHash = secretHash,
+            Type = ClientType.Confidential,
+            IsActive = true,
+            RequirePkce = true,
+            RequireConsent = requireConsent,
+            AllowOfflineAccess = true,
+            RedirectUris = [new ClientRedirectUri { Uri = CodeClientRedirectUri, Type = RedirectUriType.Redirect }],
+            GrantTypes =
+            [
+                new ClientGrantType { GrantType = GrantTypes.AuthorizationCode },
+                new ClientGrantType { GrantType = GrantTypes.RefreshToken }
+            ],
+            Scopes =
+            [
+                new ClientScope { ScopeId = StandardScopeSeed.OpenIdId },
+                new ClientScope { ScopeId = StandardScopeSeed.ProfileId },
+                new ClientScope { ScopeId = StandardScopeSeed.OfflineAccessId },
+                new ClientScope { ScopeId = ApiScopeId }
+            ]
+        };
     }
 
     private static Client CreateClient(

@@ -24,5 +24,7 @@ public class TokenConfiguration : BaseEntityConfiguration<Token, long>
         builder.HasOne(t => t.Client).WithMany().HasForeignKey(t => t.ClientId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(t => t.User).WithMany().HasForeignKey(t => t.UserId).OnDelete(DeleteBehavior.NoAction);
         builder.HasOne(t => t.ParentToken).WithMany().HasForeignKey(t => t.ParentTokenId).OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasIndex(t => t.AuthorizationGrantId);
     }
 }

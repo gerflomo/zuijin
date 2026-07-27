@@ -32,32 +32,29 @@ public class AuthorizationValidatorTests
     }
 
     [Fact]
-    public void ValidateAuthorizationCode_ValidCode_DoesNotThrow()
+    public void ValidateNotExpired_ValidCode_DoesNotThrow()
     {
         // Arrange
         var grant = CreateGrant();
 
         // Act & Assert
-        Should.NotThrow(() => AuthorizationValidator.ValidateAuthorizationCode(grant, Now));
+        Should.NotThrow(() => AuthorizationValidator.ValidateNotExpired(grant, Now));
     }
 
     [Fact]
-    public void ValidateAuthorizationCode_AlreadyUsed_ThrowsCodeAlreadyUsed()
+    public void ValidateNotExpired_AlreadyUsedCode_IsNotThisValidatorsConcern()
     {
-        // Arrange
+        // Arrange: single use is enforced atomically by the repository, not here, because
+        // reading the flag and acting on it is a race two redemptions could both win.
         var grant = CreateGrant();
         grant.IsUsed = true;
 
-        // Act
-        var exception = Should.Throw<DomainException>(
-            () => AuthorizationValidator.ValidateAuthorizationCode(grant, Now));
-
-        // Assert
-        exception.Code.ShouldBe("code_already_used");
+        // Act & Assert
+        Should.NotThrow(() => AuthorizationValidator.ValidateNotExpired(grant, Now));
     }
 
     [Fact]
-    public void ValidateAuthorizationCode_Expired_ThrowsCodeExpired()
+    public void ValidateNotExpired_Expired_ThrowsCodeExpired()
     {
         // Arrange
         var grant = CreateGrant();
@@ -65,14 +62,14 @@ public class AuthorizationValidatorTests
 
         // Act
         var exception = Should.Throw<DomainException>(
-            () => AuthorizationValidator.ValidateAuthorizationCode(grant, Now));
+            () => AuthorizationValidator.ValidateNotExpired(grant, Now));
 
         // Assert
         exception.Code.ShouldBe("code_expired");
     }
 
     [Fact]
-    public void ValidateAuthorizationCode_ExpiresExactlyNow_ThrowsCodeExpired()
+    public void ValidateNotExpired_ExpiresExactlyNow_ThrowsCodeExpired()
     {
         // Arrange
         var grant = CreateGrant();
@@ -80,7 +77,7 @@ public class AuthorizationValidatorTests
 
         // Act
         var exception = Should.Throw<DomainException>(
-            () => AuthorizationValidator.ValidateAuthorizationCode(grant, Now));
+            () => AuthorizationValidator.ValidateNotExpired(grant, Now));
 
         // Assert
         exception.Code.ShouldBe("code_expired");

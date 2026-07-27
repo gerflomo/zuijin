@@ -16,6 +16,14 @@ public sealed record TokenResponseDocument
 
     [JsonPropertyName("scope")]
     public required string Scope { get; init; }
+
+    [JsonPropertyName("id_token")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? IdToken { get; init; }
+
+    [JsonPropertyName("refresh_token")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? RefreshToken { get; init; }
 }
 
 /// <summary>Error response (RFC 6749 section 5.2).</summary>

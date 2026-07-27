@@ -6,12 +6,14 @@ namespace Zuijin.Domain.Services;
 
 public static class AuthorizationValidator
 {
-    public static void ValidateAuthorizationCode(AuthorizationGrant grant, DateTimeOffset now)
+    /// <summary>
+    /// Single use is deliberately not checked here: reading <see cref="AuthorizationGrant.IsUsed"/>
+    /// and acting on it is a race two concurrent redemptions can both win. That guarantee belongs
+    /// to the atomic conditional update in IAuthorizationGrantRepository.TryConsume.
+    /// </summary>
+    public static void ValidateNotExpired(AuthorizationGrant grant, DateTimeOffset now)
     {
-        if (grant.IsUsed)
-        {
-            throw new DomainException("code_already_used", "The authorization code has already been used.");
-        }
+        ArgumentNullException.ThrowIfNull(grant);
 
         if (grant.ExpiresAt <= now)
         {

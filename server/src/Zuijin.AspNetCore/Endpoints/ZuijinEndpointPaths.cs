@@ -14,4 +14,9 @@ public static class ZuijinEndpointPaths
     public const string Revocation = "/connect/revoke";
     public const string Introspection = "/connect/introspect";
     public const string DeviceAuthorization = "/connect/deviceauthorize";
+
+    /// <summary>Interactive pages. Not part of the OAuth protocol surface.</summary>
+    public const string Login = "/account/login";
+
+    public const string Consent = "/account/consent";
 }

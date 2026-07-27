@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
+using Zuijin.AspNetCore.Endpoints.Account;
+using Zuijin.AspNetCore.Endpoints.Authorize;
 using Zuijin.AspNetCore.Endpoints.Discovery;
 using Zuijin.AspNetCore.Endpoints.Token;
 
@@ -11,9 +13,10 @@ public static class ZuijinEndpointRouteBuilderExtensions
     {
         endpoints.MapDiscoveryEndpoints();
         endpoints.MapTokenEndpoints();
+        endpoints.MapAuthorizeEndpoints();
+        endpoints.MapAccountEndpoints();
 
         // Remaining OAuth/OIDC endpoints arrive in subsequent phases:
-        // - /connect/authorize (Phase 4)
         // - /connect/userinfo (Phase 5)
         // - /connect/revoke (Phase 5)
         // - /connect/introspect (Phase 5)

@@ -2,7 +2,6 @@ using Zuijin.Application.Abstractions;
 using Zuijin.Application.Configuration;
 using Zuijin.Domain.Constants;
 using Zuijin.Domain.Entities;
-using Zuijin.Domain.Enums;
 using Zuijin.Domain.Errors;
 using Zuijin.Domain.Repositories;
 using Zuijin.Domain.Services;
@@ -20,22 +19,19 @@ public sealed class ClientCredentialsTokenHandler
     private const string BearerTokenType = "Bearer";
     private const string ClientIdClaim = "client_id";
 
-    private readonly IClientRepository _clientRepository;
+    private readonly ClientAuthenticator _clientAuthenticator;
     private readonly IApiResourceRepository _apiResourceRepository;
-    private readonly ISecretHasher _secretHasher;
     private readonly ITokenGenerator _tokenGenerator;
     private readonly ZuijinOptions _options;
 
     public ClientCredentialsTokenHandler(
-        IClientRepository clientRepository,
+        ClientAuthenticator clientAuthenticator,
         IApiResourceRepository apiResourceRepository,
-        ISecretHasher secretHasher,
         ITokenGenerator tokenGenerator,
         ZuijinOptions options)
     {
-        _clientRepository = clientRepository;
+        _clientAuthenticator = clientAuthenticator;
         _apiResourceRepository = apiResourceRepository;
-        _secretHasher = secretHasher;
         _tokenGenerator = tokenGenerator;
         _options = options;
     }
@@ -46,7 +42,8 @@ public sealed class ClientCredentialsTokenHandler
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var client = await Authenticate(request, cancellationToken);
+        var client = await _clientAuthenticator.Authenticate(
+            request.ClientId, request.ClientSecret, requireConfidential: true, cancellationToken);
 
         ClientValidator.ValidateActive(client);
         ClientValidator.ValidateGrantType(client, GrantTypes.ClientCredentials);
@@ -73,31 +70,6 @@ public sealed class ClientCredentialsTokenHandler
             ExpiresIn = client.AccessTokenLifetime,
             Scope = string.Join(' ', scopes)
         };
-    }
-
-    /// <summary>
-    /// Resolves and authenticates the client. Credential failures deliberately return the
-    /// same error whether the client is unknown or the secret is wrong.
-    /// </summary>
-    private async Task<Client> Authenticate(ClientCredentialsTokenRequest request, CancellationToken cancellationToken)
-    {
-        var client = await _clientRepository.GetByClientId(request.ClientId, cancellationToken)
-            ?? throw new OAuthException(OAuthError.InvalidClient("Client authentication failed."));
-
-        if (client.Type != ClientType.Confidential)
-        {
-            throw new OAuthException(OAuthError.UnauthorizedClient(
-                "The client credentials grant requires a confidential client."));
-        }
-
-        if (string.IsNullOrEmpty(request.ClientSecret)
-            || string.IsNullOrEmpty(client.SecretHash)
-            || !_secretHasher.Verify(request.ClientSecret, client.SecretHash))
-        {
-            throw new OAuthException(OAuthError.InvalidClient("Client authentication failed."));
-        }
-
-        return client;
     }
 
     private static IReadOnlyList<string> ResolveScopes(Client client, IReadOnlyList<string> requestedScopes)

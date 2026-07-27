@@ -12,6 +12,9 @@ public interface ITokenRepository
     Task<IReadOnlyList<Token>> GetByClientId(Guid clientId, CancellationToken cancellationToken = default);
     Task Add(Token token, CancellationToken cancellationToken = default);
     Task Update(Token token, CancellationToken cancellationToken = default);
+    /// <summary>Revokes every token descending from a replayed authorization code.</summary>
+    Task RevokeByAuthorizationGrantId(long grantId, CancellationToken cancellationToken = default);
+
     Task RevokeByUserId(Guid userId, CancellationToken cancellationToken = default);
     Task RevokeByClientId(Guid clientId, CancellationToken cancellationToken = default);
     Task DeleteExpired(DateTimeOffset cutoff, CancellationToken cancellationToken = default);

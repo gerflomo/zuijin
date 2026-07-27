@@ -49,6 +49,13 @@ public class TokenRepository : ITokenRepository
         return Task.CompletedTask;
     }
 
+    public async Task RevokeByAuthorizationGrantId(long grantId, CancellationToken cancellationToken = default)
+    {
+        await _context.Tokens
+            .Where(token => token.AuthorizationGrantId == grantId && !token.IsRevoked)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(token => token.IsRevoked, true), cancellationToken);
+    }
+
     public async Task RevokeByUserId(Guid userId, CancellationToken cancellationToken = default)
     {
         await _context.Tokens

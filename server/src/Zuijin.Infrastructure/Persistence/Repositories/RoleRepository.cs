@@ -41,11 +41,16 @@ public class RoleRepository : IRoleRepository
 
     public async Task<IReadOnlyList<Role>> GetByUserId(Guid userId, CancellationToken cancellationToken = default)
     {
-        return await _context.UserRoles
+        // Filtering Roles by a subquery keeps Include valid: applying it after a Select that
+        // projects through a navigation is something EF Core cannot translate.
+        var roleIds = _context.UserRoles
+            .Where(userRole => userRole.UserId == userId)
+            .Select(userRole => userRole.RoleId);
+
+        return await _context.Roles
             .AsNoTracking()
-            .Where(ur => ur.UserId == userId)
-            .Select(ur => ur.Role)
-            .Include(r => r.RolePermissions).ThenInclude(rp => rp.Permission)
+            .Where(role => roleIds.Contains(role.Id))
+            .Include(role => role.RolePermissions).ThenInclude(rolePermission => rolePermission.Permission)
             .ToListAsync(cancellationToken);
     }
 
